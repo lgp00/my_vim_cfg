@@ -2,7 +2,7 @@
 - name: Config Vim With Plugins
   hosts: all
   gather_facts: yes
-  become: yes
+  become: no # run with -K to become root
 
   vars:
     vim_dir: "{{ ansible_env.HOME }}/.vim"
