@@ -26,6 +26,14 @@
       yum:
         name: vim
         state: present
+
+    - name: Check Vim version
+      shell: vim --version
+      register: vim_version_output
+
+    - name: Display Vim version
+      debug:
+        var: vim_version_output.stdout_lines
       
     - name: Ensure git is installed
       yum:
