@@ -96,6 +96,7 @@
         dest: "{{ vim_dir }}/pack/plugins/{{ item.name }}"
         repo: "{{ item.url }}"
         clone: yes
+        depth : 1
         update: yes
         recursive: no
       loop:
