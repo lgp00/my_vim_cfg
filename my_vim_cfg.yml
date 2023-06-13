@@ -5,8 +5,8 @@
   become: no
 
   vars:
-    vim_dir: "{{ ansible_env.HOME }}/.vim }}"
-    vimrc: " {{ ansible.env.HOME }}/.vimrc"
+    vim_dir: "{{ ansible_env.HOME }}/.vim"
+    vimrc: "{{ ansible.env.HOME }}/.vimrc"
 
   tasks:
     - name: Ensure vim is installed
