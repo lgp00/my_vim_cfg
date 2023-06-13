@@ -93,16 +93,16 @@
 
     - name: deploy plgins
       git:
-        dest: "{{ vim_dir }}/pack/plugins/{{ item.name }}"
+        dest: "{{ vim_dir }}/pack/plugins/start/{{ item.name }}"
         repo: "{{ item.url }}"
         clone: yes
         depth : 1
         update: yes
         recursive: no
       loop:
-        - name: indentline
+        - name: indentLine
           url: https://github.com/Yggdroot/indentLine.git
-        - name: yaml folds
+        - name: yamlFolds
           url: https://github.com/pedrohdz/vim-yaml-folds.git
         - name: ale
           url: https://github.com/dense-analysis/ale.git
