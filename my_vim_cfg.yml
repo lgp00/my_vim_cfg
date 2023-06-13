@@ -9,14 +9,17 @@
     vimrc: "{{ ansible_env.HOME }}/.vimrc"
 
   tasks:
-    - name: Install epel-release package
+    - name: Install required dependencies
       yum:
         name: epel-release
         state: present
 
+    - name: Enable PowerTools repository
+      command: yum-config-manager --enable PowerTools
+
     - name: Install Vim 8.2
       yum:
-        name: vim-enhanced
+        name: vim
         state: present
       
     - name: Ensure git is installed
