@@ -22,8 +22,25 @@
         name: dnf
         state: present
 
-    - name: Enable hnakamur/vim COPR repository
-      shell: dnf copr enable hnakamur/vim
+    - name: Install dnf-command(copr)
+      dnf:
+        name: dnf-command(copr)
+        state: present
+
+    - name: Add COPR repository for Vim
+      copy:
+        content: |
+          [hnakamur-vim]
+          name=COPR repo for vim owned by hnakamur
+          baseurl=https://copr-be.cloud.fedoraproject.org/results/hnakamur/vim/epel-7-$basearch/
+          type=rpm-md
+          skip_if_unavailable=True
+          gpgcheck=1
+          gpgkey=https://copr-be.cloud.fedoraproject.org/results/hnakamur/vim/pubkey.gpg
+          enabled=1
+          enabled_metadata=1
+        dest: /etc/yum.repos.d/hnakamur-vim.repo
+      notify: Refresh repository
 
     - name: Uninstall Vim
       yum:
@@ -95,3 +112,7 @@
         dest: "{{ vimrc }}"
         backup: yes
         mode: 0640
+
+  handlers:
+    - name: Refresh repository
+      command: yum clean expire-cache
