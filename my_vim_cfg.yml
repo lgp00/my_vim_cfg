@@ -17,6 +17,9 @@
     - name: Enable PowerTools repository
       command: yum-config-manager --enable PowerTools
 
+    - name: Enable COPR repository for Vim #bypass vim 7.4 maybe we should go back to arch 
+      command: dnf copr enable -y hnakamur/vim
+
     - name: Uninstall Vim
       yum:
         name: vim
@@ -28,7 +31,7 @@
         state: present
 
     - name: Check Vim version
-      shell: vim --version
+      shell: vim --version | head -n 3
       register: vim_version_output
 
     - name: Display Vim version
