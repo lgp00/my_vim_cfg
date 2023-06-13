@@ -9,22 +9,22 @@
     vimrc: "{{ ansible_env.HOME }}/.vimrc"
 
   tasks:
-    - name: Update Vim on CentOS/RHEL
+    - name: Install epel-release package
       yum:
-        name: vim
-        state: latest
-        update_cache: yes
+        name: epel-release
+        state: present
+
+    - name: Install Vim 8.2
+      yum:
+        name: vim-enhanced
+        state: present
       
     - name: Ensure git is installed
       yum:
         name: git
         state: present
 
-    - name: Install epel-release package
-      yum:
-        name: epel-release
-        state: present
-
+    
     - name: Install python-pip package
       yum:
         name: python-pip
