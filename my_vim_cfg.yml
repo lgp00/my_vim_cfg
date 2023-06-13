@@ -1,0 +1,52 @@
+---
+- name: Config Vim With Plugins
+  hosts: localhost
+  gather_facts: yes
+  become: no
+
+  vars:
+    vim_dir: "{{ ansible_env.HOME }}/.vim }}"
+    vimrc: " {{ ansible.env.HOME }}/.vimrc"
+
+  tasks:
+    - name: Install required packages
+      pip:
+        name: yamllint
+        state: present
+        extra_args: --user
+
+    - name: Ensure dirs exists
+      file:
+        path: "{{ item }}"
+        state: directory
+        recurse: no
+        mode: 0750
+      loop:
+        - "{{ vim_dir }}"
+        - "{{ vim_dir }}/autoload"
+        - "{{ vim_dir }}/bundle"
+        - "{{ vim_dir }}/pack/plugins/start"
+        - ~/.config/yamllint
+        - ~/bin
+
+    - name: deploy plgins
+      git:
+        dest: "{{ vim_dir }}/pack/plugins/{{ item.name }}"
+        repo: "{{ item.url }}"
+        clone: yes
+        update: yes
+        recursive: no
+      loop:
+        - name: indentline
+          url: https://github.com/Yggdroot/indentLine.git
+        - name: yaml folds
+          url: https://github.com/pedrohdz/vim-yaml-folds.git
+        - name: ale
+          url: https://github.com/dense-analysis/ale.git
+
+    - name: ensure .vimrc config in place
+      copy:
+        src: vimrc
+        dest: "{{ vimrc }}"
+        backup: yes
+        mode: 0640
