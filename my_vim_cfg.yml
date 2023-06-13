@@ -63,13 +63,13 @@
     - name: Ensure git is installed
       yum:
         name: git
-        state: present
+        state: latest
 
     
     - name: Install python-pip package
       yum:
         name: python-pip
-        state: present
+        state: latest
 
     - name: Install required packages
       pip:
