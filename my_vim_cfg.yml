@@ -9,6 +9,26 @@
     vimrc: " {{ ansible.env.HOME }}/.vimrc"
 
   tasks:
+    - name: Ensure vim is installed
+      yum:
+        name: vim
+        state: present
+
+    - name: Ensure git is installed
+      yum:
+        name: git
+        state: present
+
+    - name: Install epel-release package
+      yum:
+        name: epel-release
+        state: present
+
+    - name: Install python-pip package
+      yum:
+        name: python-pip
+        state: present
+
     - name: Install required packages
       pip:
         name: yamllint
