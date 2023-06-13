@@ -17,8 +17,13 @@
     - name: Enable PowerTools repository
       command: yum-config-manager --enable PowerTools
 
-    - name: Enable COPR repository for Vim
-      command: yum copr enable -y hnakamur/vim
+    - name: Install dnf
+      yum:
+        name: dnf
+        state: present
+
+    - name: Enable hnakamur/vim COPR repository
+      shell: dnf copr enable hnakamur/vim
 
     - name: Uninstall Vim
       yum:
