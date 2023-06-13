@@ -17,6 +17,11 @@
     - name: Enable PowerTools repository
       command: yum-config-manager --enable PowerTools
 
+    - name: Uninstall Vim
+      yum:
+        name: vim
+        state: absent
+
     - name: Install Vim 8.2
       yum:
         name: vim
