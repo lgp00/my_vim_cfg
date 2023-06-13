@@ -42,14 +42,14 @@
         dest: /etc/yum.repos.d/hnakamur-vim.repo
       notify: Refresh repository
 
-    - name: Uninstall Vim
+    - name: Remove conflicting vim-minimal package
       yum:
-        name: vim
+        name: vim-minimal
         state: absent
 
     - name: Install Vim 8.2
       yum:
-        name: vim
+        name: vim-enhanced
         state: present
 
     - name: Check Vim version
