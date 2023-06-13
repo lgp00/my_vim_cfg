@@ -22,14 +22,11 @@
         name: dnf
         state: present
 
-<<<<<<< HEAD
     - name: Install dnf-command(copr)
       dnf:
         name: dnf-command(copr)
         state: present
 
-=======
->>>>>>> main
     - name: Add COPR repository for Vim
       copy:
         content: |
