@@ -60,6 +60,11 @@
       debug:
         var: vim_version_output.stdout_lines
 
+    - name: Stop all tasks if Vim version is less than 8
+      fail:
+        msg: "Vim version is less than 8"
+      when: vim_version_output.stdout|int < 8
+
     - name: Ensure git is installed
       yum:
         name: git
@@ -114,7 +119,7 @@
         backup: true
         mode: '0640'
 
-    - name: Create alias
+    - name: Ensure alias for vim is set
       command: "alias vi=vim"
 
   handlers:
