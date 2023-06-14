@@ -80,11 +80,11 @@
         name: python-pip
         state: present
 
-    - name: Ensure needed python packages are installed
-      ansible.builtin.pip:
+    - name: Update yum and install yamllint
+      ansible.builtin.yum:
         name: yamllint
-        state: present
-        extra_args: --user
+        state: latest
+        update_cache: true
 
     - name: Ensure dirs exists
       ansible.builtin.file:
