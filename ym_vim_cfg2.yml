@@ -124,8 +124,12 @@
         mode: "0640"
 
     - name: Add alias for vi to use vim
-      ansible.builtin.command:
-        cmd: "alias vi=vim"
+      ansible.builtin.lineinfile:
+        path: /etc/profile
+        line: "alias vi=vim"
+        state: present
+        create: true
+        insertafter: EOF
 
   handlers:
     - name: Refresh repository
