@@ -114,10 +114,8 @@
         backup: true
         mode: '0640'
 
-    - name: Create snap alias
-      community.general.snap_alias:
-        name: vim
-        alias: vi
+    - name: Create alias
+      command: "alias vi=vim"
 
   handlers:
     - name: Refresh repository
