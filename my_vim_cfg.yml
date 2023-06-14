@@ -67,8 +67,9 @@
 
     - name: Stop all tasks if Vim version is less than 8
       fail:
-        msg: "Vim version is less than 8"
-      when: vim_version_output.stdout_lines[0] | regex_replace('^VIM - Vi IMproved ', '') | version_compare('8.0', '<')
+        msg: "Vim version is less than 8.1"
+      when: vim_version_output.stdout_lines[0] | regex_search('8.1') == False
+
 
     - name: Ensure git is installed
       yum:
