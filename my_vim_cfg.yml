@@ -114,6 +114,11 @@
         backup: yes
         mode: 0640
 
+      - name: Create snap alias
+      community.general.snap_alias:
+        name: vim
+        alias: vi
+        
   handlers:
     - name: Refresh repository
       command: yum clean expire-cache
