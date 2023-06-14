@@ -1,8 +1,8 @@
 ---
 - name: Config Vim With Plugins
-  hosts: all # run on all hosts
+  hosts: all
   gather_facts: true
-  become: false # run with -K to become root
+  become: false
 
   vars:
     vim_dir: "{{ ansible_env.HOME }}/.vim"
@@ -47,7 +47,12 @@
         name: vim-minimal
         state: absent
 
-    - name: Install Vim 8.2
+    - name: Uninstall Vim
+      ansible.builtin.yum:
+        name: vim-enhanced
+        state: absent
+
+    - name: Install Vim 8.1
       ansible.builtin.yum:
         name: vim-enhanced
         state: present
@@ -55,23 +60,27 @@
     - name: Check Vim version
       ansible.builtin.shell: vim --version | head -n 3
       register: vim_version_output
-      changed_when: false
 
     - name: Display Vim version
       ansible.builtin.debug:
         var: vim_version_output.stdout_lines
 
+    - name: Stop all tasks if Vim version is less than 8
+      ansible.builtin.fail:
+        msg: "Vim version is less than 8.1"
+      when: vim_version_output.stdout_lines[0] | regex_search('8.1') == False
+
     - name: Ensure git is installed
       ansible.builtin.yum:
         name: git
-        state: present
+        state: latest
 
     - name: Install python-pip package
       ansible.builtin.yum:
         name: python-pip
         state: present
 
-    - name: Install required packages
+    - name: Ensure needed python packages are installed
       ansible.builtin.pip:
         name: yamllint
         state: present
@@ -82,21 +91,21 @@
         path: "{{ item }}"
         state: directory
         recurse: false
-        mode: '0750'
+        mode: "0750"
       loop:
         - "{{ vim_dir }}"
         - "{{ vim_dir }}/autoload"
         - "{{ vim_dir }}/bundle"
         - "{{ vim_dir }}/pack/plugins/start"
-        - "{{ ansible_env.HOME }}/.config/yamllint"
-        - "{{ ansible_env.HOME }}/bin"
+        - ~/.config/yamllint
+        - ~/bin
 
-    - name: deploy plgins
+    - name: deploy plugins
       ansible.builtin.git:
         dest: "{{ vim_dir }}/pack/plugins/start/{{ item.name }}"
         repo: "{{ item.url }}"
-        clone: True
-        depth : 1
+        clone: true
+        depth: 1
         update: true
         recursive: false
       loop:
@@ -111,14 +120,15 @@
       ansible.builtin.copy:
         src: vimrc
         dest: "{{ vimrc }}"
-        backup: yes
-        mode: '0640'
+        backup: true
+        mode: "0640"
 
-    - name: Create snap alias
-      community.general.snap_alias:
-        name: vim
-        alias: vi
+    - name: Ensure alias for vi is set
+      ansible.builtin.command: "alias vi=vim"
+      args:
+        creates: "/etc/profile.d/vim.sh"
 
   handlers:
     - name: Refresh repository
       ansible.builtin.command: yum clean expire-cache
+...
