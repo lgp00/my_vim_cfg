@@ -47,6 +47,11 @@
         name: vim-minimal
         state: absent
 
+    - name: Uninstall Vim
+      yum:
+        name: vim-enhanced
+        state: absent
+
     - name: Install Vim 8.2
       yum:
         name: vim-enhanced
@@ -70,7 +75,6 @@
         name: git
         state: latest
 
-
     - name: Install python-pip package
       yum:
         name: python-pip
@@ -87,7 +91,7 @@
         path: "{{ item }}"
         state: directory
         recurse: false
-        mode: '0750'
+        mode: "0750"
       loop:
         - "{{ vim_dir }}"
         - "{{ vim_dir }}/autoload"
@@ -117,7 +121,7 @@
         src: vimrc
         dest: "{{ vimrc }}"
         backup: true
-        mode: '0640'
+        mode: "0640"
 
     - name: Ensure alias for vim is set
       command: "alias vi=vim"
