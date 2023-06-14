@@ -123,9 +123,9 @@
         backup: true
         mode: "0640"
 
-    - name: Ensure alias for vi is set
-      ansible.builtin.command: "alias vi='vim'"
-      args:
+    - name: Add alias for vi to use vim
+      ansible.builtin.command:
+        cmd: "alias vi=vim"
         creates: "/etc/profile.d/vim.sh"
 
   handlers:
