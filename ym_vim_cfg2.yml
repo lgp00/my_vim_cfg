@@ -10,25 +10,25 @@
 
   tasks:
     - name: Install required dependencies
-      yum:
+      ansible.builtin.yum:
         name: epel-release
         state: present
 
     - name: Enable PowerTools repository
-      command: yum-config-manager --enable PowerTools
+      ansible.builtin.command: yum-config-manager --enable PowerTools
 
     - name: Install dnf
-      yum:
+      ansible.builtin.yum:
         name: dnf
         state: present
 
     - name: Install dnf-command(copr)
-      dnf:
+      ansible.builtin.dnf:
         name: dnf-command(copr)
         state: present
 
     - name: Add COPR repository for Vim
-      copy:
+      ansible.builtin.copy:
         content: |
           [hnakamur-vim]
           name=COPR repo for vim owned by hnakamur
@@ -43,42 +43,42 @@
       notify: Refresh repository
 
     - name: Remove conflicting vim-minimal package
-      yum:
+      ansible.builtin.yum:
         name: vim-minimal
         state: absent
 
     - name: Install Vim 8.2
-      yum:
+      ansible.builtin.yum:
         name: vim-enhanced
         state: present
 
     - name: Check Vim version
-      shell: vim --version | head -n 3
+      ansible.builtin.shell: vim --version | head -n 3
       register: vim_version_output
+      changed_when: false
 
     - name: Display Vim version
-      debug:
+      ansible.builtin.debug:
         var: vim_version_output.stdout_lines
 
     - name: Ensure git is installed
-      yum:
+      ansible.builtin.yum:
         name: git
-        state: latest
-
+        state: present
 
     - name: Install python-pip package
-      yum:
+      ansible.builtin.yum:
         name: python-pip
-        state: latest
+        state: present
 
     - name: Install required packages
-      pip:
+      ansible.builtin.pip:
         name: yamllint
         state: present
         extra_args: --user
 
     - name: Ensure dirs exists
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         recurse: false
@@ -88,15 +88,15 @@
         - "{{ vim_dir }}/autoload"
         - "{{ vim_dir }}/bundle"
         - "{{ vim_dir }}/pack/plugins/start"
-        - ~/.config/yamllint
-        - ~/bin
+        - "{{ ansible_env.HOME }}/.config/yamllint"
+        - "{{ ansible_env.HOME }}/bin"
 
     - name: deploy plgins
-      git:
+      ansible.builtin.git:
         dest: "{{ vim_dir }}/pack/plugins/start/{{ item.name }}"
         repo: "{{ item.url }}"
-        clone: true
-        depth: 1
+        clone: True
+        depth : 1
         update: true
         recursive: false
       loop:
@@ -108,10 +108,10 @@
           url: https://github.com/dense-analysis/ale.git
 
     - name: Ensure .vimrc config in place
-      copy:
+      ansible.builtin.copy:
         src: vimrc
         dest: "{{ vimrc }}"
-        backup: true
+        backup: yes
         mode: '0640'
 
     - name: Create snap alias
@@ -121,4 +121,4 @@
 
   handlers:
     - name: Refresh repository
-      command: yum clean expire-cache
+      ansible.builtin.command: yum clean expire-cache
