@@ -1,6 +1,7 @@
 ---
 - name: Config Vim With Plugins RHEL9
   hosts: all
+  connection: local # local connection is used because we are running ansible on the same machine
   gather_facts: true
   become: false
 
