@@ -1,0 +1,151 @@
+---
+- name: Config Vim With Plugins
+  hosts: all # run on all hosts
+  gather_facts: true
+  become: false # run with -K to become root
+
+  vars:
+    vim_dir: "{{ ansible_env.HOME }}/.vim"
+    vimrc: "{{ ansible_env.HOME }}/.vimrc"
+
+  tasks:
+    - name: Install required dependencies
+      ansible.builtin.yum:
+        name: epel-release
+        state: present
+
+    - name: Enable PowerTools repository
+      ansible.builtin.command: yum-config-manager --enable PowerTools
+
+    - name: Install dnf
+      ansible.builtin.yum:
+        name: dnf
+        state: present
+
+    - name: Install dnf-command(copr)
+      ansible.builtin.dnf:
+        name: dnf-command(copr)
+        state: present
+
+    - name: Add COPR repository for Vim
+      ansible.builtin.copy:
+        content: |
+          [hnakamur-vim]
+          name=COPR repo for vim owned by hnakamur
+          baseurl=https://copr-be.cloud.fedoraproject.org/results/hnakamur/vim/epel-7-$basearch/
+          type=rpm-md
+          skip_if_unavailable=True
+          gpgcheck=1
+          gpgkey=https://copr-be.cloud.fedoraproject.org/results/hnakamur/vim/pubkey.gpg
+          enabled=1
+          enabled_metadata=1
+        dest: /etc/yum.repos.d/hnakamur-vim.repo
+      notify: Refresh repository
+
+    - name: Remove conflicting vim-minimal package
+      ansible.builtin.yum:
+        name: vim-minimal
+        state: absent
+
+    - name: Uninstall Vim
+      ansible.builtin.yum:
+        name: vim-enhanced
+        state: absent
+
+    - name: Install Vim 8.1
+      ansible.builtin.yum:
+        name: vim-enhanced
+        state: present
+
+    - name: Check Vim version
+      ansible.builtin.shell: vim --version | head -n 3
+      register: vim_version_output
+
+    - name: Display Vim version
+      ansible.builtin.debug:
+        var: vim_version_output.stdout_lines
+
+    - name: Stop all tasks if Vim version is less than 8
+      ansible.builtin.fail:
+        msg: "Vim version is less than 8.1"
+      when: vim_version_output.stdout_lines[0] | regex_search('8.1') == False
+
+    - name: Ensure git is installed
+      ansible.builtin.yum:
+        name: git
+        state: latest
+
+    - name: Install python-pip package
+      ansible.builtin.yum:
+        name: python-pip
+        state: present
+
+    - name: Update yum and install yamllint
+      ansible.builtin.yum:
+        name: yamllint
+        state: latest
+        update_cache: true
+
+    - name: Check if yamllint is present
+      ansible.builtin.command: "yamllint --version"
+      register: yamllint_version
+      ignore_errors: true
+
+    - name: Display yamllint version
+      ansible.builtin.debug:
+        var: yamllint_version.stdout_lines
+
+    - name: Fail if yamllint is not present
+      ansible.builtin.fail:
+        msg: "yamllint is not installed"
+      when: yamllint_version.rc != 0
+
+    - name: Ensure dirs exists
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        recurse: false
+        mode: "0750"
+      loop:
+        - "{{ vim_dir }}"
+        - "{{ vim_dir }}/autoload"
+        - "{{ vim_dir }}/bundle"
+        - "{{ vim_dir }}/pack/plugins/start"
+        - ~/.config/yamllint
+        - ~/bin
+
+    - name: deploy plugins
+      ansible.builtin.git:
+        dest: "{{ vim_dir }}/pack/plugins/start/{{ item.name }}"
+        repo: "{{ item.url }}"
+        clone: true
+        depth: 1
+        update: true
+        recursive: false
+      loop:
+        - name: indentLine
+          url: https://github.com/Yggdroot/indentLine.git
+        - name: yamlFolds
+          url: https://github.com/pedrohdz/vim-yaml-folds.git
+        - name: ale
+          url: https://github.com/dense-analysis/ale.git
+
+    - name: Ensure .vimrc config in place
+      ansible.builtin.copy:
+        src: vimrc
+        dest: "{{ vimrc }}"
+        backup: true
+        mode: "0640"
+
+    - name: Add alias for vi to use vim
+      ansible.builtin.lineinfile:
+        path: /etc/profile
+        line: "alias vi=vim"
+        state: present
+        create: true
+        insertafter: EOF
+
+  handlers:
+    - name: Refresh repository
+      ansible.builtin.command: yum clean expire-cache
+...
