@@ -10,58 +10,77 @@
     vimrc: "{{ ansible_env.HOME }}/.vimrc"
 
   tasks:
-  - name: Install Vim
-    yum:
-      name: vim
-      state: present
+    # Check if system is RHEL9
+    - name: Check if system is RHEL9
+      ansible.builtin.command: cat /etc/redhat-release
+      register: redhat_release
+      ignore_errors: true
 
-  - name: Check Vim version
-    ansible.builtin.shell: vim --version | head -n 3
-    register: vim_version_output
+    - name: Display redhat_release
+      ansible.builtin.debug:
+        var: redhat_release.stdout_lines
 
-  - name: Display Vim version
-    ansible.builtin.debug:
-      var: vim_version_output.stdout_lines
+    - name: Stop all tasks if system is not RHEL9
+      ansible.builtin.fail:
+        msg: "System is not RHEL9"
+      when: redhat_release.stdout_lines[0] | regex_search('Red Hat Enterprise Linux release 9') == False
+    # Start the actual tasks
+    - name: Install Vim
+      yum:
+        name: vim
+        state: present
 
-  - name: Stop all tasks if Vim version is less than 8
-    ansible.builtin.fail:
-      msg: "Vim version is less than 8.1"
-    when: vim_version_output.stdout_lines[0] | regex_search('8.1') == False
+    - name: Check Vim version
+      ansible.builtin.shell: vim --version | head -n 3
+      register: vim_version_output
 
-  - name: Ensure dirs exists
-    ansible.builtin.file:
-      path: "{{ item }}"
-      state: directory
-      recurse: false
-      mode: "0750"
-    loop:
-      - "{{ vim_dir }}"
-      - "{{ vim_dir }}/autoload"
-      - "{{ vim_dir }}/bundle"
-      - "{{ vim_dir }}/pack/plugins/start"
-      - ~/.config/yamllint
-      - ~/bin
+    - name: Display Vim version
+      ansible.builtin.debug:
+        var: vim_version_output.stdout_lines
 
-  - name: deploy plugins
-    ansible.builtin.git:
-      dest: "{{ vim_dir }}/pack/plugins/start/{{ item.name }}"
-      repo: "{{ item.url }}"
-      clone: true
-      depth: 1
-      update: true
-      recursive: false
-    loop:
-      - name: indentLine
-        url: https://github.com/Yggdroot/indentLine.git
-      - name: yamlFolds
-        url: https://github.com/pedrohdz/vim-yaml-folds.git
-      - name: ale
-        url: https://github.com/dense-analysis/ale.git
+    - name: Stop all tasks if Vim version is less than 8
+      ansible.builtin.fail:
+        msg: "Vim version is less than 8.1"
+      when: vim_version_output.stdout_lines[0] | regex_search('8.1') == False
 
-  - name: Ensure .vimrc config in place
-    ansible.builtin.copy:
-      src: vimrc
-      dest: "{{ vimrc }}"
-      backup: true
-      mode: "0640"
+    - name: Ensure dirs exists
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        recurse: false
+        mode: "0750"
+      loop:
+        - "{{ vim_dir }}"
+        - "{{ vim_dir }}/autoload"
+        - "{{ vim_dir }}/bundle"
+        - "{{ vim_dir }}/pack/plugins/start"
+        - ~/.config/yamllint
+        - ~/bin
+
+    - name: Deploy plugins
+      ansible.builtin.git:
+        dest: "{{ vim_dir }}/pack/plugins/start/{{ item.name }}"
+        repo: "{{ item.url }}"
+        clone: true
+        depth: 1
+        update: true
+        recursive: false
+      loop:
+        - name: indentLine
+          url: https://github.com/Yggdroot/indentLine.git
+        - name: yamlFolds
+          url: https://github.com/pedrohdz/vim-yaml-folds.git
+        - name: ale
+          url: https://github.com/dense-analysis/ale.git
+
+    - name: Ensure .vimrc config in place
+      ansible.builtin.copy:
+        src: vimrc
+        dest: "{{ vimrc }}"
+        backup: true
+        mode: "0640"
+
+    - name: Automation completed successfully
+      ansible.builtin.debug:
+        msg: "automation completed successfully ✨"
 ...
