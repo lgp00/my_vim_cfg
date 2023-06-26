@@ -1,0 +1,13 @@
+---
+- name: Config Vim With Plugins RHEL9
+  hosts: all
+  gather_facts: true
+  become: false
+
+  tasks:
+  - name: Install Vim
+    yum:
+      name: vim
+      state: present
+
+...
