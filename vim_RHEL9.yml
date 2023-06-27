@@ -3,7 +3,7 @@
   hosts: localhost
   connection: local # local connection is used because we are running ansible on the same machine
   gather_facts: true
-  become: false
+  become: true # become is used because we are installing packages
 
   vars:
     vim_dir: "{{ ansible_env.HOME }}/.vim"
@@ -24,12 +24,12 @@
       ansible.builtin.fail:
         msg: "System is not RHEL9"
       when: redhat_release.stdout_lines[0] | regex_search('Red Hat Enterprise Linux release 9') == False
+    
     # Start the actual tasks
     - name: Install Vim
       yum:
         name: vim
         state: present
-        become: true
 
     - name: Check Vim version
       ansible.builtin.shell: vim --version | head -n 3
