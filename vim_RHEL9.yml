@@ -29,6 +29,7 @@
       yum:
         name: vim
         state: present
+        become: true
 
     - name: Check Vim version
       ansible.builtin.shell: vim --version | head -n 3
