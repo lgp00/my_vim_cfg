@@ -81,6 +81,26 @@
         backup: true
         mode: "0640"
 
+    - name: Update yum and install yamllint
+      ansible.builtin.yum:
+        name: yamllint
+        state: latest
+        update_cache: true
+
+    - name: Check if yamllint is present
+      ansible.builtin.command: "yamllint --version"
+      register: yamllint_version
+      ignore_errors: true
+
+    - name: Display yamllint version
+      ansible.builtin.debug:
+        var: yamllint_version.stdout_lines
+
+    - name: Fail if yamllint is not present
+      ansible.builtin.fail:
+        msg: "yamllint is not installed"
+      when: yamllint_version.rc != 0
+
     - name: Automation completed successfully
       ansible.builtin.debug:
         msg: "automation completed successfully ✨"
